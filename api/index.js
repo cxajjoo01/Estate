@@ -1,43 +1,43 @@
 import express from "express";
 import mongoose from "mongoose";
-import userRouter from './routes/user_route.js'
-import authRouter from './routes/authRoute.js'
+import userRouter from './routes/user_route.js';
+import authRouter from './routes/authRoute.js';
 import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
 
-mongoose
-  .connect(process.env.MongoDB)
-  .then(() => {
+const connectToMongoDB = async () => {
+  try {
+    await mongoose.connect(process.env.MongoDB, {
+      serverSelectionTimeoutMS: 30000, // Increase server selection timeout
+      socketTimeoutMS: 45000 // Increase socket timeout
+    });
     console.log("Connected to MongoDB!");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
+  } catch (err) {
+    console.error("Failed to connect to MongoDB", err);
+  }
+};
 
-app.use(express.json())  
+connectToMongoDB();
 
-app.listen(7000, () => {
-  console.log("Server is running on port 7000!!");
-});
-
-
-app.get('/test', (req,res) =>{
-    res.send("Welcome to my API");
-})
+app.use(express.json());
 
 app.use('/api/user', userRouter);
 app.use('/api/auth', authRouter);
 
-//MIDDLEWARE CONCEPTS
+
+// Error handling middleware
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || 'Internal Server Error';
-  return res.status(statusCode).json({
-     success: false,
-     statusCode,
-     message
+  res.status(statusCode).json({
+    success: false,
+    statusCode,
+    message
   });
 });
 
+app.listen(7000, () => {
+  console.log("Server is running on port 7000!!");
+});
