@@ -2,10 +2,12 @@ import express from "express";
 import mongoose from "mongoose";
 import userRouter from './routes/user_route.js';
 import authRouter from './routes/authRoute.js';
+import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
+
 
 const connectToMongoDB = async () => {
   try {
@@ -22,6 +24,7 @@ const connectToMongoDB = async () => {
 connectToMongoDB();
 
 app.use(express.json());
+app.use(cookieParser())
 
 app.use('/api/user', userRouter);
 app.use('/api/auth', authRouter);

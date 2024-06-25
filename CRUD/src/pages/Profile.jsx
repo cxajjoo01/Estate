@@ -10,15 +10,11 @@ import { app } from "./../firebase";
 
 const Profile = () => {
   const fileRef = useRef(null);
-  const [file, setFile] = useState(undefined);
+  const [file, setFile] = useState(null); // Initial state should be null
   const [filePercent, setFilePercent] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
   const [formData, setFormData] = useState({});
   const { currentUser } = useSelector((state) => state.user);
-
-  console.log(formData);
-  console.log(filePercent);
-  console.log(fileUploadError);
 
   useEffect(() => {
     if (file) {
@@ -35,35 +31,27 @@ const Profile = () => {
     uploadTask.on(
       "state_changed",
       (snapshot) => {
-        const progress =
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         setFilePercent(Math.round(progress));
       },
       (error) => {
+        console.error('Error during file upload:', error);  
         setFileUploadError(true);
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          setFormData({ ...formData, profilePic: downloadURL });
+          setFormData((prevFormData) => ({ ...prevFormData, profilePic: downloadURL }));
+          setFileUploadError(false);  // Reset error state on successful upload
         });
       }
     );
-  };
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle form submission logic
   };
 
   return (
     <div className="p-3 max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
 
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+      <form className="flex flex-col gap-4">
         <input
           onChange={(e) => setFile(e.target.files[0])}
           type="file"
@@ -74,20 +62,22 @@ const Profile = () => {
         <img
           onClick={() => fileRef.current.click()}
           className="w-24 h-24 rounded-full self-center cursor-pointer mt-2"
-          src={formData.profilePic || currentUser.user.profilePic}
+          src={formData.profilePic || currentUser?.user?.profilePic || "/defaultProfilePic.jpg"}
           alt=""
         />
 
         <p className="text-sm self-center">
-        {
-            fileUploadError ? (
-          <span className="text-red-700">Error image upload (image size must be less than 2 mb) </span>
-        ) : filePercent > 0 && filePercent < 100 ? (
-          <span className="text-slate-700">{`Uploading ${filePercent}%`}</span>
-        ) : filePercent === 100 ? (
-          <span className="text-green-700">Image uploaded successfully!</span>
-        ) :''
-        }
+          {fileUploadError ? (
+            <span className="text-red-700">
+              Error image upload (image size must be less than 2 mb)
+            </span>
+          ) : filePercent > 0 && filePercent < 100 ? (
+            <span className="text-slate-700">{`Uploading ${filePercent}%`}</span>
+          ) : filePercent === 100 ? (
+            <span className="text-green-700">Image uploaded successfully!</span>
+          ) : (
+            ''
+          )}
         </p>
 
         <input
@@ -95,8 +85,6 @@ const Profile = () => {
           type="text"
           placeholder="username"
           id="username"
-          value={formData.username || ""}
-          onChange={handleChange}
         />
 
         <input
@@ -104,8 +92,6 @@ const Profile = () => {
           type="email"
           placeholder="email"
           id="email"
-          value={formData.email || ""}
-          onChange={handleChange}
         />
 
         <input
@@ -113,13 +99,10 @@ const Profile = () => {
           type="password"
           placeholder="password"
           id="password"
-          value={formData.password || ""}
-          onChange={handleChange}
         />
         <button
           className="bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80"
-          type="submit"
-        >
+          type="submit">
           update
         </button>
       </form>
