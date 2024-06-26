@@ -1,21 +1,21 @@
 import { GoogleAuthProvider, signInWithPopup, getAuth } from "firebase/auth";
 import { app } from "../firebase";
 import { useDispatch } from "react-redux";
-import { signInSuccess } from "../redux/user/userSlice";
+import { signInSuccess, signInFailure } from "../redux/user/userSlice";
 import { useNavigate } from 'react-router-dom';
 
 const Oauth = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleGoogleClick = async () => {
     try {
       const provider = new GoogleAuthProvider();
       const auth = getAuth(app);
-  
+
       const result = await signInWithPopup(auth, provider);
       console.log(result);
-  
+
       const res = await fetch("/api/auth/google", {
         method: "POST",
         headers: {
@@ -27,18 +27,27 @@ const Oauth = () => {
           photo: result.user.photoURL,
         }),
       });
-      const data = await res.json(); // Use await here
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to authenticate');
+      }
+
       dispatch(signInSuccess(data));
       navigate('/');
     } catch (error) {
-      console.log("could not sign in with google!", error);
+      console.log("Could not sign in with Google!", error);
+      dispatch(signInFailure(error.message));
     }
   };
+
   return (
     <button
       onClick={handleGoogleClick}
       type="button"
-      className="bg-red-700 rounded-lg p-3 uppercase hover:bg-red-500 text-white">
+      className="bg-red-700 rounded-lg p-3 uppercase hover:bg-red-500 text-white"
+    >
       Continue With Google
     </button>
   );

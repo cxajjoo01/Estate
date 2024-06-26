@@ -15,23 +15,30 @@ export const userUpdate = async (req, res, next) => {
 
   try {
     if (req.body.password) {
-      req.body.password = bcryptjs.hashSync(req.body.password, 10); 
+      req.body.password = bcryptjs.hashSync(req.body.password, 10);
+    }
+
+    const updatedFields = {
+      username: req.body.username,
+      email: req.body.email,
+      profilePic: req.body.profilePic,
+    };
+
+    if (req.body.password) {
+      updatedFields.password = req.body.password;
     }
 
     const userUpdate = await User.findByIdAndUpdate(
       req.params.id,
-      {
-        $set: {
-          username: req.body.username,
-          email: req.body.email,
-          password: req.body.password,
-          profilePic: req.body.profilePic,
-        },
-      },
+      { $set: updatedFields },
       { new: true }
     );
 
-    const { password: pass, ...rest } = userUpdate._doc;
+    if (!userUpdate) {
+      return next(errorHandler(404, 'User not found'));
+    }
+
+    const { password, ...rest } = userUpdate._doc;
     res.status(200).json(rest);
 
   } catch (error) {
