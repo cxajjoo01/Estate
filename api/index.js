@@ -2,6 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import userRouter from './routes/user_route.js';
 import authRouter from './routes/authRoute.js';
+import listingRouter from './routes/listingRoute.js'
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 dotenv.config();
@@ -28,6 +29,7 @@ app.use(cookieParser())
 
 app.use('/api/user', userRouter);
 app.use('/api/auth', authRouter);
+app.use('/api/listing',listingRouter);
 
 
 // Error handling middleware
