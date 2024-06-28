@@ -9,9 +9,10 @@ const Header = () => {
     <header className="bg-slate-200 shadow-md">
       <div className="flex justify-between items-center max-w-6xl mx-auto p-3">
         <Link to='/'>
-          <h1 className="font-bold text-sm sm:text-xl flex flex-wrap">
-            <span className="text-slate-700">Aayansh</span>
-            <span className="text-slate-500">Estate</span>
+          <h1 className="text-sm sm:text-xl flex flex-wrap items-center">
+            <span className="text-slate-700 font-semibold">Aayansh</span>
+            <span className="text-slate-500 font-semibold">Residence</span>
+            <img className='w-[60px] h-[60px] rounded-full ml-4' src='/images/logo/ajay.jpg' alt=''/>
           </h1>
         </Link>
 
